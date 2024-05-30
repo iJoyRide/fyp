@@ -1,0 +1,9 @@
+datasets/
+runs/
+models/
+.idea
+videos/
+.env.local
+images/
+env/
+pycache/
