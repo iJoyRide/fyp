@@ -7,3 +7,4 @@ videos/
 images/
 env/
 pycache/
+service_account.json

@@ -1,71 +1,33 @@
-from uuid import uuid4
+from googleapiclient.discovery import build
+from google.oauth2 import service_account
+from google.auth.transport.requests import Request
+import os
 
-import boto3
-from botocore.exceptions import ClientError
-import magic
-import uvicorn
-from fastapi import FastAPI, HTTPException, Response, UploadFile, status
-from loguru import logger
+SCOPES = ['https://www.googleapis.com/auth/drive']
+SERVICE_ACCOUNT_FILE = r'C:\Users\Sumfl\OneDrive\Documents\GitHub\fyp\service_account.json'
+PARENT_FOLDER_ID = "1VuGchHSjYHFoPjbBf8Li4cVybz-sNVIE"
 
-# session = boto3.Session(
-#     aws_access_key_id='ACCESS_KEY',
-#     aws_secret_access_key='SECRET_KEY',
-# )
+def authenticate():
+    creds = service_account.Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE, scopes=SCOPES)
+    return creds
 
-KB = 1024
-MB = 1024 * KB
+def upload_folder(file_path):
+    creds = authenticate()
+    service = build('drive', 'v3', credentials=creds)
+    
+    # Get the file name from the file path
+    file_name = os.path.basename(file_path)
+    
+    file_metadata = {
+        'name': file_name,
+        'parents': [PARENT_FOLDER_ID],
+    }
+    
+    # Upload the file
+    file = service.files().create(
+        body=file_metadata,
+        media_body=file_path
+    ).execute()
+    
 
-SUPPORTED_FILE_TYPES = {
-    'image/png': 'png',
-    'image/jpeg': 'jpg',
-    'application/pdf': 'pdf'
-}
-
-AWS_BUCKET = 'my-bucket-124'
-
-s3 = boto3.resource('s3')
-bucket = s3.Bucket(AWS_BUCKET)
-
-
-async def s3_upload(contents: bytes, key: str):
-    logger.info(f'Uploading {key} to s3')
-    bucket.put_object(Key=key, Body=contents)
-
-
-async def s3_download(key: str):
-    try:
-        return s3.Object(bucket_name=AWS_BUCKET, key=key).get()['Body'].read()
-    except ClientError as err:
-        logger.error(str(err))
-
-app = FastAPI()
-
-@app.post('/upload')
-async def upload(file: UploadFile | None = None):
-    if not file:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail='No file found!!'
-        )
-
-    contents = await file.read()
-    size = len(contents)
-
-    if not 0 < size <= 1 * MB:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail='Supported file size is 0 - 1 MB'
-        )
-
-    file_type = magic.from_buffer(buffer=contents, mime=True)
-    if file_type not in SUPPORTED_FILE_TYPES:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f'Unsupported file type: {file_type}. Supported types are {SUPPORTED_FILE_TYPES}'
-        )
-    file_name = f'{uuid4()}.{SUPPORTED_FILE_TYPES[file_type]}'
-    await s3_upload(contents=contents, key=file_name)
-    return {'file_name': file_name}
-
-if __name__ == '__main__':
-    uvicorn.run(app='main:app', reload=True)
+upload_folder(r"C:\Users\Sumfl\OneDrive\Documents\GitHub\fyp\images\2024-05-30_13-09-57")
