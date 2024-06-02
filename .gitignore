@@ -8,3 +8,4 @@ images/
 env/
 pycache/
 service_account.json
+yolov8n.pt

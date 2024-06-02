@@ -77,7 +77,7 @@ if __name__ == "__main__":
         subfolder_path = create_folder()
         if subfolder_path:
             # Model
-            model = YOLO("/models/yolov8n.pt")
+            model = YOLO("./yolov8n.pt")
 
             # Capture images when simulated sensor event occurs
             capture_duration = 15  # Duration to capture images (in seconds)
