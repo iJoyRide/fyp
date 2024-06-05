@@ -1,21 +1,19 @@
+import time
 from googleapiclient.discovery import build
 from google.oauth2 import service_account
-from google.auth.transport.requests import Request
+from google.auth.exceptions import RefreshError
+from googleapiclient.errors import HttpError
 from googleapiclient.http import MediaFileUpload
 import os
 import mimetypes
 
 SCOPES = ["https://www.googleapis.com/auth/drive"]
-SERVICE_ACCOUNT_FILE = (
-    r"C:\Users\Sumfl\OneDrive\Documents\GitHub\fyp\service_account.json"
-)
+SERVICE_ACCOUNT_FILE = r"C:\Users\Sumfl\OneDrive\Documents\GitHub\fyp\service_account.json"
 PARENT_FOLDER_ID = "1VuGchHSjYHFoPjbBf8Li4cVybz-sNVIE"
 
 
 def authenticate():
-    creds = service_account.Credentials.from_service_account_file(
-        SERVICE_ACCOUNT_FILE, scopes=SCOPES
-    )
+    creds = service_account.Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE, scopes=SCOPES)
     return creds
 
 
@@ -47,7 +45,19 @@ def upload_folder_contents(folder_path, parent_folder_id):
             subfolder_id = create_folder(item, parent_folder_id)
             upload_folder_contents(item_path, subfolder_id)
         else:
-            upload_file(item_path, parent_folder_id)
+            upload_with_retry(item_path, parent_folder_id)
+
+
+def upload_with_retry(file_path, parent_folder_id):
+    """Upload a file to Google Drive with retry mechanism."""
+    while True:
+        try:
+            upload_file(file_path, parent_folder_id)
+            break  # Upload successful, exit the loop
+        except (HttpError, RefreshError) as e:
+            print(f"Encountered an error: {e}")
+            print("Waiting for 5 minutes before retrying...")
+            time.sleep(300)  # Wait for 5 minutes before retrying
 
 
 def upload_file(file_path, parent_folder_id):
@@ -82,9 +92,5 @@ def upload_file(file_path, parent_folder_id):
 
 
 if __name__ == "__main__":
-    # Example usage:
-
     # Upload subfolders and their contents to the parent folder
-    upload_folder_contents(
-        r"C:\Users\Sumfl\OneDrive\Documents\GitHub\fyp\images", PARENT_FOLDER_ID
-    )
+    upload_folder_contents(r"C:\Users\Sumfl\OneDrive\Documents\GitHub\fyp\images", PARENT_FOLDER_ID)

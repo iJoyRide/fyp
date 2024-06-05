@@ -1,0 +1,14 @@
+#!/bin/bash
+# Test connectivity to Internet at 1 minute intervals
+ONLINE=1
+while [ $ONLINE -ne 0 ]
+do
+   ping -q -c 1 -w 1 www.*******.com >/dev/null 2>&1
+   ONLINE=$?
+   if [ $ONLINE -ne 0 ]
+     then
+       sleep 60
+   fi
+done
+echo "We are on line!"
+#Reporting code follows..
