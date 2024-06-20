@@ -53,16 +53,16 @@ while True:
             color = (255, 0, 0)
             thickness = 1
 
-            if classNames[cls] == "bottle":
+            if classNames[cls] == "dog":
                 # Generate unique filename based on image_counter
-                image_name = f"bottle_{image_counter}.jpg"
+                image_name = f"dog_{image_counter}.jpg"
                 image_path = os.path.join(subfolder_path, image_name)
 
                 # Check if file already exists
                 while os.path.exists(image_path):
                     # If file exists, increment image_counter and generate new filename
                     image_counter += 1
-                    image_name = f"bottle_{image_counter}.jpg"
+                    image_name = f"dog_{image_counter}.jpg"
                     image_path = os.path.join(subfolder_path, image_name)
 
                 # Put text on image

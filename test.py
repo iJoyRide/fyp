@@ -33,9 +33,9 @@ def capture_images(duration, subfolder_path, classNames):
                     color = (255, 0, 0)
                     thickness = 1
 
-                    if classNames[cls] == "cell phone":
+                    if classNames[cls] == "dog":
                         # Save the image
-                        image_name = f"cell phone{time.strftime('%Y-%m-%d_%H-%M-%S')}.jpg"
+                        image_name = f"dog{time.strftime('%Y-%m-%d_%H-%M-%S')}.jpg"
                         image_path = os.path.join(subfolder_path, image_name)
                         # Put text on image
                         cv2.putText(img, classNames[cls], (x1, y1), font, fontScale, color, thickness)
