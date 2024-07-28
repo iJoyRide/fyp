@@ -1,9 +1,8 @@
 import cv2
-import math
 import os
-from ultralytics import YOLO
 import time
 import logging
+from ultralytics import YOLO
 from object_classes import classNames
 
 # Configure logging
@@ -14,6 +13,10 @@ def capture_images(duration, subfolder_path, classNames, video_path):
     try:
         # Open the video file
         cap = cv2.VideoCapture(video_path)
+        if not cap.isOpened():
+            logging.error(f"Failed to open video file: {video_path}")
+            return
+        
         start_time = time.time()
         while time.time() - start_time < duration:
             success, img = cap.read()
@@ -71,21 +74,24 @@ def create_folder():
     
 if __name__ == "__main__":
     try:
-        video_path = "./video/dog1.mp4"  # Path to your MP4 video file
-        subfolder_path = create_folder()
-        if subfolder_path:
-            # Load model
-            model = YOLO("./yolov8n.pt")
-
-            # Capture images when simulated sensor event occurs
-            capture_duration = 15  # Duration to capture images (in seconds)
-
-            # Simulate sensor event
-            logging.info("Starting image capture...")
-            capture_images(capture_duration, subfolder_path, classNames, video_path)
-
-            cv2.destroyAllWindows()
+        video_path = "./video/dog2.mp4"  # Path to your MP4 video file
+        if not os.path.isfile(video_path):
+            logging.error(f"Video file does not exist: {video_path}")
         else:
-            logging.error("Failed to create folder for storing images.")
+            subfolder_path = create_folder()
+            if subfolder_path:
+                # Load model
+                model = YOLO("./yolov8n.pt")
+
+                # Capture images when simulated sensor event occurs
+                capture_duration = 60  # Duration to capture images (in seconds)
+
+                # Simulate sensor event
+                logging.info("Starting image capture...")
+                capture_images(capture_duration, subfolder_path, classNames, video_path)
+
+                cv2.destroyAllWindows()
+            else:
+                logging.error("Failed to create folder for storing images.")
     except Exception as e:
         logging.error(f"An unexpected error occurred: {e}")
