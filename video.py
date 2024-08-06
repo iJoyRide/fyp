@@ -39,7 +39,7 @@ def capture_images(duration, subfolder_path, classNames, video_path):
                     color = (0, 255, 0)  # Change color to green
                     thickness = 1
 
-                    if classNames[cls] == "dog":
+                    if cls == 0:
                         # Save the image
                         image_name = f"dog{time.strftime('%Y-%m-%d_%H-%M-%S')}.jpg"
                         image_path = os.path.join(subfolder_path, image_name)
@@ -74,20 +74,22 @@ def create_folder():
     
 if __name__ == "__main__":
     try:
-        video_path = "./video/dog2.mp4"  # Path to your MP4 video file
+        video_path = "./video/dog7.mp4"  # Path to your MP4 video file
         if not os.path.isfile(video_path):
             logging.error(f"Video file does not exist: {video_path}")
         else:
             subfolder_path = create_folder()
             if subfolder_path:
                 # Load model
-                model = YOLO("./yolov8n.pt")
+                model = YOLO("./best.pt")
 
                 # Capture images when simulated sensor event occurs
                 capture_duration = 60  # Duration to capture images (in seconds)
 
                 # Simulate sensor event
+                logging.info("Motion detection started.")
                 logging.info("Starting image capture...")
+                logging.info("Object Detection with TPU Accelerator...")
                 capture_images(capture_duration, subfolder_path, classNames, video_path)
 
                 cv2.destroyAllWindows()
